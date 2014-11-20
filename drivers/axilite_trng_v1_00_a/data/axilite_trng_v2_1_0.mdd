@@ -1,0 +1,15 @@
+##############################################################################
+## Filename:          /home/ajmills/zedboard-trng/drivers/axilite_trng_v1_00_a/data/axilite_trng_v2_1_0.mdd
+## Description:       Microprocessor Driver Definition
+## Date:              Mon Nov 10 22:34:19 2014 (by Create and Import Peripheral Wizard)
+##############################################################################
+
+OPTION psf_version = 2.1.0;
+
+BEGIN DRIVER axilite_trng
+
+  OPTION supported_peripherals = (axilite_trng);
+  OPTION depends = (common_v1_00_a);
+  OPTION copyfiles = all;
+
+END DRIVER

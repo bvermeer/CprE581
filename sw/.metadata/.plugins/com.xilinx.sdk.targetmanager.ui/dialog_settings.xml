@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<item value="/home/ajmills/zedboard-trng/implementation/system.bit" key="zed_hw_platform-bitFile"/>
+	<item value="" key="zed_hw_platform-bmmFile"/>
+</section>
