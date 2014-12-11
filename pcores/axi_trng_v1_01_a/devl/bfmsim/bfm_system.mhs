@@ -1,0 +1,42 @@
+# ##############################################################################
+# 
+# BFM simulation system
+# 
+# Automatically created by Create and Import Peripheral Wizard
+# 
+# Sat Nov 22 21:25:44 2014
+# 
+# ##############################################################################
+
+ PARAMETER VERSION = 2.1.0
+
+
+ PORT sys_reset = sys_reset, DIR = IN, SIGIS = RST
+ PORT sys_clk = sys_clk, DIR = IN, SIGIS = CLK, CLK_FREQ = 100000000
+
+
+BEGIN cdn_axi4_master_bfm_wrap
+ PARAMETER INSTANCE = bfm_processor
+ PARAMETER HW_VER = 2.01.b
+ PARAMETER C_M_AXI_DATA_WIDTH = 64
+ BUS_INTERFACE M_AXI = axi4_bus
+ PORT M_AXI_ACLK = sys_clk
+END
+
+BEGIN axi_interconnect
+ PARAMETER INSTANCE = axi4_bus
+ PARAMETER HW_VER = 1.06.a
+ PARAMETER C_INTERCONNECT_CONNECTIVITY_MODE = 0
+ PORT INTERCONNECT_ARESETN = sys_reset
+ PORT INTERCONNECT_ACLK = sys_clk
+END
+
+BEGIN axi_trng
+ PARAMETER INSTANCE = axi_trng_inst
+ PARAMETER HW_VER = 1.01.a
+ PARAMETER C_S_AXI_MEM0_BASEADDR = 0x40000000
+ PARAMETER C_S_AXI_MEM0_HIGHADDR = 0x4000ffff
+ BUS_INTERFACE S_AXI = AXI4_bus
+ PORT S_AXI_ACLK = sys_clk
+END
+

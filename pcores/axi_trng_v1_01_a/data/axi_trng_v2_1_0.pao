@@ -1,0 +1,13 @@
+##############################################################################
+## Filename:          /home/ajmills/CprE581/pcores/axi_trng_v1_01_a/data/axi_trng_v2_1_0.pao
+## Description:       Peripheral Analysis Order
+## Date:              Sat Nov 22 21:25:34 2014 (by Create and Import Peripheral Wizard)
+##############################################################################
+
+lib proc_common_v3_00_a  all 
+lib axi_slave_burst_v1_00_a  all 
+lib axi_trng_v1_01_a puf_sram vhdl
+lib axi_trng_v1_01_a puf_128 vhdl
+lib axi_trng_v1_01_a  Md5Core verilog
+lib axi_trng_v1_01_a user_logic vhdl
+lib axi_trng_v1_01_a axi_trng vhdl
