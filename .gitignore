@@ -111,3 +111,9 @@ impact_impact.xwbt
 #Ignore OS noise
 Thumbs.db
 .DS_Store
+
+#Ignore extra Latex files in the paper folder
+Paper/*.aux
+Paper/*.log
+Paper/*.synctex.gz
+Paper/*.pdf
