@@ -25,10 +25,29 @@ architecture Behavioral of puf_sram is
 -- attribute keep of i1: signal is "TRUE";
 -- attribute keep of i2: signal is "TRUE";
  attribute rloc: string;
+  attribute route: string;
+attribute bel: string;
+
  attribute lock_pins: string;
  attribute lock_pins of lut_inst1 : label is "all";
  attribute lock_pins of lut_inst2 : label is "all";
  
+attribute route of rstin: signal is "{3;1;7z020clg484;2527b9e5!-1;161004;230552;S!0;-683;-80!1;-1837;2253!2;1837;1211!2;1433;1947!3;683;-320;L!4;404;-592!6;683;-272;L!}";
+attribute route of i2 : signal is "{3;1;7z020clg484;ec9081bc!-1;161004;233664;S!0;-683;64!1;0;376!2;683;-304;L!}";
+attribute route of i1: signal is "{3;1;7z020clg484;1812ef66!-1;161004;233872;S!0;-683;-128!1;7139;1647!2;-3905;-2091!3;-3234;564!4;683;-264;L!}";
+
+attribute rloc of RST_DFF : label is "X0Y0";
+attribute bel of RST_DFF: label is "BFF";
+attribute rloc of lut_inst1 : label is "X0Y0";
+attribute bel of lut_inst1 : label is "A6LUT";
+attribute rloc of lut_inst2: label is "X0Y0";
+attribute bel of lut_inst2 : label is "C6LUT";
+attribute rloc of Q2_DFF : label is "X0Y0";
+attribute bel of  Q2_DFF: label is "AFF";
+attribute rloc of Q1_DFF : label is "X0Y0";
+attribute bel of Q1_DFF: label is "CFF";
+
+  
 begin
 
 --begin dynamically generated portion
@@ -95,6 +114,7 @@ CE => en, -- Clock enable input
 CLR => '0', -- Asynchronous clear input
 D => i2 -- Data input
 );
+
 
 
 end Behavioral;

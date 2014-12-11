@@ -183,6 +183,7 @@ architecture IMP of user_logic is
 	signal state: statetype := init;
 
 	signal i_rst: std_logic;
+	signal puf_rst: std_logic;
 	signal s_index : integer :=0;
 	signal s_rdy: std_logic;
 	signal s_hash_out: std_logic_vector(31 downto 0);
@@ -190,13 +191,18 @@ architecture IMP of user_logic is
 	signal s_dummy2: std_logic_vector(31 downto 0);
 	signal s_dummy3: std_logic_vector(31 downto 0);
 
-	signal s_puf_data: std_logic_vector(DATA_WIDTH-1 downto 0);
-	
-	component puf_128
+	signal s_puf_data: std_logic_vector(DATA_WIDTH-1 downto 0);	
+	signal s_puf_data1: std_logic_vector(DATA_WIDTH-1 downto 0);
+	signal s_puf_data2: std_logic_vector(DATA_WIDTH-1 downto 0);
+
+	component puf_128 
 		Generic ( PUF_SIZE : integer := 128 );
 		Port ( 	
+			i_rst  : in  STD_LOGIC;
 			i_clk  : in  STD_LOGIC;
-			o_out : out  STD_LOGIC_VECTOR(PUF_SIZE - 1 downto 0)
+			o_out1 : out  STD_LOGIC_VECTOR(PUF_SIZE - 1 downto 0);
+			o_out2 : out  STD_LOGIC_VECTOR(PUF_SIZE - 1 downto 0)
+
 		);
 	end component;
 
@@ -219,11 +225,8 @@ architecture IMP of user_logic is
 component Md5Core
 	Port(
 		clk : in STD_LOGIC; 
-		wb : in STD_LOGIC_VECTOR(511 downto 0); 
-		a0 : in STD_LOGIC_VECTOR(31 downto 0);
-		b0 : in STD_LOGIC_VECTOR(31 downto 0);
-		c0 : in STD_LOGIC_VECTOR(31 downto 0);  
-		d0 : in STD_LOGIC_VECTOR(31 downto 0); 
+		rst : in STD_LOGIC; 
+		wb : in STD_LOGIC_VECTOR(511 downto 0); 		
 		a64 : out STD_LOGIC_VECTOR(31 downto 0);
 		b64 : out STD_LOGIC_VECTOR(31 downto 0);
 		c64 : out STD_LOGIC_VECTOR(31 downto 0); 
@@ -260,6 +263,7 @@ begin
 
   i_rst <= not Bus2IP_Resetn;
 
+	--puf_rst <= not slv_read_ack ;
 
   -- implement slave model software accessible register(s)
   SLAVE_REG_WRITE_PROC : process( Bus2IP_Clk ) is
@@ -487,12 +491,12 @@ begin
                 slv_reg30(byte_index*8+7 downto byte_index*8) <= Bus2IP_Data(byte_index*8+7 downto byte_index*8);
               end if;
             end loop;
-          when "00000000000000000000000000000001" =>
-            for byte_index in 0 to (C_SLV_DWIDTH/8)-1 loop
-              if ( Bus2IP_BE(byte_index) = '1' ) then
-                slv_reg31(byte_index*8+7 downto byte_index*8) <= Bus2IP_Data(byte_index*8+7 downto byte_index*8);
-              end if;
-            end loop;
+--          when "00000000000000000000000000000001" =>
+--            for byte_index in 0 to (C_SLV_DWIDTH/8)-1 loop
+--              if ( Bus2IP_BE(byte_index) = '1' ) then
+--                slv_reg31(byte_index*8+7 downto byte_index*8) <= Bus2IP_Data(byte_index*8+7 downto byte_index*8);
+--              end if;
+--            end loop;
           when others => null;
         end case;
       end if;
@@ -552,13 +556,23 @@ begin
   IP2Bus_RdAck <= slv_read_ack;
   IP2Bus_Error <= '0';
 
+
+process(slv_reg30,s_puf_data1,s_puf_data2)
+begin
+	if slv_reg30(0) ='1' then
+		s_puf_data<=s_puf_data2;
+	else
+		s_puf_data<=s_puf_data1;
+	end if;
+end process;
+
   --internal syncronous logic
   process(i_rst, Bus2IP_Clk)
 	begin
 		if i_rst = '1' then
 			state <= init;
 			s_rdy <='0';
-
+			puf_rst <= '1';
 		elsif Bus2IP_Clk = '1' and Bus2IP_Clk'event then
 		
 			case state is
@@ -574,6 +588,7 @@ begin
 							s_rdy <= '1';
 					end if;					
 				when done => --nothing
+					puf_rst<='0';
 				when others=>
 					state <= done; --error?
 			end case;
@@ -585,19 +600,22 @@ begin
 	PUF_ARRAY: puf_128
 		generic map( PUF_SIZE => DATA_WIDTH )
 		port map(
+			i_rst => puf_rst,
 			i_clk => Bus2IP_Clk,
-			o_out => s_puf_data
+			o_out1 => s_puf_data1,
+			o_out2 => s_puf_data2
 		);
 
 
 MD5_HASH: Md5Core
 	port map(
 		clk => Bus2IP_Clk, 
+		rst => i_rst,
 		wb => s_puf_data, 
-		a0=>X"67452301",
-		b0=>X"efcdab89", 
-		c0=>X"98badcfe", 
-		d0=>X"10325476", 
+		--a0=>X"67452301",
+		--b0=>X"efcdab89", 
+		--c0=>X"98badcfe", 
+		--d0=>X"10325476", 
 		a64=> s_hash_out,
    	b64=> s_dummy1, 
 		c64=> s_dummy2, 

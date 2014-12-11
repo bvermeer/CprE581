@@ -6,6 +6,7 @@
 
 lib proc_common_v3_00_a  all 
 lib axi_lite_ipif_v1_01_a  all 
+lib axilite_trng_v1_00_a puf_sram vhdl
 lib axilite_trng_v1_00_a puf vhdl
 lib axilite_trng_v1_00_a puf_128 vhdl
 lib axilite_trng_v1_00_a  Md5Core verilog

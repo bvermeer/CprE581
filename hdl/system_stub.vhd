@@ -9,9 +9,6 @@ use UNISIM.VCOMPONENTS.ALL;
 
 entity system_stub is
   port (
-    SWs_8Bits_TRI_IO : inout std_logic_vector(7 downto 0);
-    LEDs_8Bits_TRI_IO : out std_logic_vector(7 downto 0);
-    BTNs_5Bits_TRI_IO : inout std_logic_vector(4 downto 0);
     processing_system7_0_MIO : inout std_logic_vector(53 downto 0);
     processing_system7_0_PS_SRSTB : in std_logic;
     processing_system7_0_PS_CLK : in std_logic;
@@ -40,9 +37,6 @@ architecture STRUCTURE of system_stub is
 
   component system is
     port (
-      SWs_8Bits_TRI_IO : inout std_logic_vector(7 downto 0);
-      LEDs_8Bits_TRI_IO : out std_logic_vector(7 downto 0);
-      BTNs_5Bits_TRI_IO : inout std_logic_vector(4 downto 0);
       processing_system7_0_MIO : inout std_logic_vector(53 downto 0);
       processing_system7_0_PS_SRSTB : in std_logic;
       processing_system7_0_PS_CLK : in std_logic;
@@ -74,9 +68,6 @@ begin
 
   system_i : system
     port map (
-      SWs_8Bits_TRI_IO => SWs_8Bits_TRI_IO,
-      LEDs_8Bits_TRI_IO => LEDs_8Bits_TRI_IO,
-      BTNs_5Bits_TRI_IO => BTNs_5Bits_TRI_IO,
       processing_system7_0_MIO => processing_system7_0_MIO,
       processing_system7_0_PS_SRSTB => processing_system7_0_PS_SRSTB,
       processing_system7_0_PS_CLK => processing_system7_0_PS_CLK,

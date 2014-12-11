@@ -24,9 +24,6 @@ UcfFile: data/system.ucf
 EnableParTimingError: 1
 ShowLicenseDialog: 1
 BInfo: 
-LockAddr: BTNs_5Bits,C_BASEADDR
-LockAddr: LEDs_8Bits,C_BASEADDR
-LockAddr: SWs_8Bits,C_BASEADDR
 Processor: processing_system7_0
 ElfImp: 
 ElfSim: 

@@ -55,12 +55,12 @@ end component;
 	-- Note that these constrain the sub-elements WITHIN a PUF bit.
 	-- The PUF bit itself is relocatable anywhere on the device.
 	
---RLOC6
---	attribute rloc of FDCPE_inst: label is "X2Y1";
---	attribute rloc of MUXCY_T: label is "X0Y1";
---   attribute rloc of SRL16E_inst: label is "X1Y1";
---	attribute rloc of MUXCY_B: label is "X0Y0";
---	attribute rloc of SRL16E_inst2: label is "X1Y0";
+--RLOC6 -mostly 1s
+	attribute rloc of FDCPE_inst: label is "X2Y1";
+	attribute rloc of MUXCY_T: label is "X0Y1";
+   attribute rloc of SRL16E_inst: label is "X1Y1";
+	attribute rloc of MUXCY_B: label is "X0Y0";
+	attribute rloc of SRL16E_inst2: label is "X1Y0";
 	
 --RLOC5  -- mostly 1s
 --	attribute rloc of FDCPE_inst: label is "X1Y2";
@@ -69,26 +69,26 @@ end component;
 --	attribute rloc of MUXCY_B: label is "X0Y0";
 --	attribute rloc of SRL16E_inst2: label is "X1Y0";
 	
---RLOC4
+--RLOC4 --does not compile.
 --	attribute rloc of FDCPE_inst: label is "X0Y2";
 --	attribute rloc of MUXCY_T: label is "X0Y0";
---   attribute rloc of SRL16E_inst: label is "X0Y1";
+ --  attribute rloc of SRL16E_inst: label is "X0Y1";
 --	attribute rloc of MUXCY_B: label is "X1Y0";
 --	attribute rloc of SRL16E_inst2: label is "X1Y1";
 
---RLOC3
+--RLOC3  -- mostly 1s
 --	attribute rloc of FDCPE_inst: label is "X2Y0";
 --	attribute rloc of MUXCY_T: label is "X0Y1";
 --   attribute rloc of SRL16E_inst: label is "X1Y1";
 --	attribute rloc of MUXCY_B: label is "X0Y0";
 --	attribute rloc of SRL16E_inst2: label is "X1Y0";
 	
---RLOC2
-	attribute rloc of FDCPE_inst: label is "X2Y0";
-	attribute rloc of MUXCY_T: label is "X1Y1";
-   attribute rloc of SRL16E_inst: label is "X0Y1";
-	attribute rloc of MUXCY_B: label is "X1Y0";
-	attribute rloc of SRL16E_inst2: label is "X0Y0";
+--RLOC2 --mostly 1s
+--	attribute rloc of FDCPE_inst: label is "X2Y0";
+--	attribute rloc of MUXCY_T: label is "X1Y1";
+--   attribute rloc of SRL16E_inst: label is "X0Y1";
+--	attribute rloc of MUXCY_B: label is "X1Y0";
+--	attribute rloc of SRL16E_inst2: label is "X0Y0";
 
 --RLOC1 --mostly 1s
 --	attribute rloc of FDCPE_inst: label is "X0Y2";

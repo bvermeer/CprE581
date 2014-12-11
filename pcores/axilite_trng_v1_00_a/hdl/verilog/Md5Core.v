@@ -38,14 +38,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   __lhs2 <= __rhs2;                                                     \
   __lhs3 <= __rhs3;                                                     \
 
-module Md5Core (clk,wb,a0,b0,c0,d0,a64,b64,c64,d64 );
+module Md5Core (clk,rst,wb,a64,b64,c64,d64 );
 
   input wire clk; 
+  input wire rst; 
   input wire [511:0] wb; 
-  input wire [31:0] a0;
-  input wire [31:0] b0; 
-  input wire [31:0] c0; 
-  input wire [31:0] d0; 
   output reg [31:0] a64; 
   output reg [31:0] b64; 
   output reg [31:0] c64; 
@@ -70,6 +67,7 @@ module Md5Core (clk,wb,a0,b0,c0,d0,a64,b64,c64,d64 );
   assign w0[15] = wb[511:480];
 
   reg [31:0] 
+  a0, b0, c0, d0,
   a1, b1, c1, d1,
   a2, b2, c2, d2,
   a3, b3, c3, d3,
@@ -199,8 +197,19 @@ module Md5Core (clk,wb,a0,b0,c0,d0,a64,b64,c64,d64 );
   reg [31:0] w62 [0:15];
   reg [31:0] w63 [0:15];
   
-  always @(posedge clk)
-    begin
+  always @(posedge clk or posedge rst)
+ begin
+    if(rst)
+	   begin
+	     
+	     a0<=32'h67452301;
+	     b0<=32'hefcdab89; 
+	     c0<=32'h98badcfe; 
+	     d0<=32'h10325476;
+	     
+	   end 	   
+    else
+      begin
       `CopyDigestWords(a1, d0, d1, c0, c1, b0)
       b1 <= b0 + ((((a0 + ((b0 & c0) | ((~b0) & d0)) + 'hd76aa478 + w0[0]) << 7) | ((a0 + ((b0 & c0) | ((~b0) & d0)) + 'hd76aa478 + w0[0]) >> (32 - 7))));
       `CopyChunkWords(w1, w0)
@@ -454,7 +463,13 @@ module Md5Core (clk,wb,a0,b0,c0,d0,a64,b64,c64,d64 );
       `CopyChunkWords(w63, w62)
 
       `CopyDigestWords(a64, d63, d64, c63, c64, b63)
-      b64 <= b63 + (((a63 + (c63 ^ (b63 | (~d63))) + 'heb86d391 + w63[(7 * 63) % 16]) << 21) | ((a63 + (c63 ^ (b63 | (~d63))) + 'heb86d391 + w63[(7 * 63) % 16]) >> (32 - 21)));      
+      b64 <= b63 + (((a63 + (c63 ^ (b63 | (~d63))) + 'heb86d391 + w63[(7 * 63) % 16]) << 21) | ((a63 + (c63 ^ (b63 | (~d63))) + 'heb86d391 + w63[(7 * 63) % 16]) >> (32 - 21)));  
+
+	a0 <= a0 + a64;
+   	b0 <= b0 + b64;
+	c0 <= c0 + c64;
+	d0 <= d0 + d64;
+      end 
     end
 endmodule
 
