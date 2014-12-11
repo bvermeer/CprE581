@@ -168,9 +168,9 @@ The abstract goes here.
 
 \section{Introduction}
 
-A True-Random Number Generator (TRNG) is a device which generates random binary values based on physical entropy. This is in contrast to psuedo-random number generators, which generate random numbers based on a particular algorithm. TRNGs are important in many applications requiring a high level of security.  
+In this project we extend the functionality of a ARM-based CPU to interface with a True-Random Number Generator (TRNG) over a high-speed, high throughput peripheral interface.  A True-Random Number Generator (TRNG) is a device which generates random binary values based on physical entropy. This is in contrast to psuedo-random number generators, which generate random numbers based on a particular algorithm. TRNGs are critical components in applications requiring a high level of security. Using a relatively simple implementation allows us to focus on exploring the mechanics of CPU peripheral interfacing in the context of a modern, reconfigurable microcontroller.  
 
-In this project we extend the functionality of a ARM-based CPU to interface with a TRNG over a high-speed, high throughput peripheral interface. In Section II, the general architecture of the chosen hardware platform is described. In Section III, the specific details are our implementation are covered. Section IV shows our performance benchmarking results, and Section V concludes. 
+In Section II, the general architecture of the chosen hardware platform is described. In Section III, the specific details are our implementation are covered. Section IV shows our performance benchmarking results, and Section V concludes.
 
 
 \section{Xilinx Zynq 7000 Architecture}
@@ -188,14 +188,14 @@ Top view components of our design.
 \begin{figure}[!th]
 \centering
 \includegraphics[scale=.35]{Images/coprocessor-template.pdf}
-\caption{ Coprocessor Template}
+\caption{ Basic Coprocessor Template}
 \label{fig:template}
 \end{figure} 
 
 
 \begin{figure}[!th]
 \centering
-\includegraphics[scale=.9]{Images/trng.pdf}
+\includegraphics[scale=.75]{Images/trng.pdf}
 \caption{PUF Array As TRNG }
 \label{fig:trng}
 \end{figure} 
@@ -204,7 +204,7 @@ Top view components of our design.
 
 \subsection{Software}
 
-The software portion of our system consists of a simple testbench coupled with a small bare-metal support library. 
+The software portion of our system consists of a simple testbench coupled with a small bare-metal support library. EXAMPLE.
 
 \subsection{AXI Bus}
 
@@ -223,22 +223,48 @@ The entropy source consists of a large array of identical cells. Each cell is an
   \subfloat[Logical]{\includegraphics[scale=.9]{Images/puf_logical.pdf}
 					\label{logicaldesign}}
    %add desired spacing between images, e. g. ~, \quad, \qquad etc. (or a blank line to force the subfig onto a new line)
-  \caption{PUF Design}
+  \caption{Selected PUF Design}
   \label{fig:design}
 \vspace{-5mm}
 \end{figure}
 
 \subsection{Strong Mixing Function}
 
-
+Because only a subset of PUF bits exhibit unstable behavior, a strong mixing function is needed to eliminate 0- or 1-bias, and to spread bit changes accross all output bits. For this project an opensource implementation of MD5 was used. It is designed for streaming operation and can complete one hash per AXI bus clock cycle, so that the average latency is eqivalent to a simple register file. It is the output of the mixing function which is considered the true-random number, and thus it is this value which is made available to the CPU over the AXI bus in the form of a memory-mapped register.  
 
 \section{System Performance}
 
-Performance was assessed 
+Performance was assessed as the rate at which new register values can be read over the AXI bus. This is a function of a number of factors:
+
+\begin{enumerate}
+  \item User Logic
+  \begin{enumerate}
+    \item Time to Assert RVALID
+    \item Maximum clock rate which ensure timing closure
+  \end{enumerate}
+  \item Bus Interface Clock. Besides user logic, depends on: 
+  \begin{enumerate}
+    \item Address decoding logic (implemented in PL) 
+   \item  Interconnect structure (presence of handshaking logic, bus width conversions, etc)
+  \end{enumerate}
+  \item Interconnect Structure 
+ \begin{enumerate}
+    \item Shared vs. Crossbar
+    \item CPU port (GP vs HS)
+    \item Bus width (eg. 32-bit vs 64 bit)
+    \item Extra FIFOs, extra address or data registers (eg. to meet timing), etc
+  \end{enumerate}
+  \item CPU software
+ \begin{enumerate}
+    \item Compiler Optimization Level
+    \item Transfer width (eg. 32-bit vs 64 bit) 
+  \end{enumerate}
+\end{enumerate}
+
 
 \section{Conclusion}
 
-In concluding, we were able to successfully meet our goals for the project. 
+In concluding, we were able to successfully meet our goals for the project, etc, etc.  
 
 
 
