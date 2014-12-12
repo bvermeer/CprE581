@@ -42,8 +42,9 @@
 //void print(char *str);
 
 #define RUNMODE_TEST 1
-#define RUNMODE_DUMP 2
-#define RUNMODE RUNMODE_TEST
+#define RUNMODE_DUMP_REGS 2
+#define RUNMODE_DUMP_HASH 3
+#define RUNMODE RUNMODE_DUMP_REGS
 
 void Xil_Out64(u32 OutAddress, u64 Value)
 {
@@ -56,6 +57,33 @@ u64 Xil_In64(u32 Addr)
 	return *(volatile u64 *) Addr;
 }
 
+
+void uart_send_u32(u32 data){
+
+    outbyte (((unsigned char *) &data) [0]);
+    outbyte (((unsigned char *) &data) [1]);
+    outbyte (((unsigned char *) &data) [2]);
+    outbyte (((unsigned char *) &data) [3]);
+
+	//outbyte((data&(0xff<<0))>>0); //lsb first -> little endian
+	//outbyte((data&(0xff<<8))>>8);
+	//outbyte((data&(0xff<<16))>>16);
+	//outbyte((data&(0xff<<24))>>24);
+
+
+}
+
+void uart_send_u64(u64 data){
+
+	outbyte (((unsigned char *) &data) [0]);
+	outbyte (((unsigned char *) &data) [1]);
+	outbyte (((unsigned char *) &data) [2]);
+	outbyte (((unsigned char *) &data) [3]);
+	outbyte (((unsigned char *) &data) [4]);
+	outbyte (((unsigned char *) &data) [5]);
+	outbyte (((unsigned char *) &data) [6]);
+	outbyte (((unsigned char *) &data) [7]);
+}
 
 /*
 void init_perfmon_profile(){
@@ -77,7 +105,6 @@ int main()
 {
     init_platform();
     Xil_DCacheDisable();
-
     u64 arr[32];
 
 #if RUNMODE == RUNMODE_TEST
@@ -167,32 +194,63 @@ int main()
     printf("\r\nTotal ticks: %d\r\n",(unsigned int)tdiff);
     printf("Total time (ms): %f\r\n",time_ms);
     printf("Done!\n\r");
-#else
+#elif RUNMODE == RUNMODE_DUMP_REGS
 
-    int i;
-    u64 output;
-    u32 nsamples = 10000; //assumes 64 bit words
-    u32 nbytes = nsamples * 8;
+    int i,j,k;
+     u64 output;
+     u32 nsamples = 1000; //assumes 64 bit words
+     u32 nbytes = nsamples * 55; //regfile has 64 - 8 -1 usuable bytes
+
 
     //send the xmission length
-    putchar (((unsigned char *) &nbytes) [0]);
-    putchar (((unsigned char *) &nbytes) [1]);
-    putchar (((unsigned char *) &nbytes) [2]);
-    putchar (((unsigned char *) &nbytes) [3]);
+    uart_send_u32(nbytes);
+
+ //   return 0;
 
     //send the samples
     for(i=0;i<nsamples;i++){
-     	output = Xil_In64(TRNG_REG(9));
-     	//printf("%016llX\n\n",output);
-        putchar (((unsigned char *) &output) [0]);
-        putchar (((unsigned char *) &output) [1]);
-        putchar (((unsigned char *) &output) [2]);
-        putchar (((unsigned char *) &output) [3]);
-        putchar (((unsigned char *) &output) [4]);
-        putchar (((unsigned char *) &output) [5]);
-        putchar (((unsigned char *) &output) [6]);
-        putchar (((unsigned char *) &output) [7]);
+    	 for(j=0;j<7;j+=1){ //do this for every 64 bit reg
+    		 output = Xil_In64(TARGET(j));
+
+
+    	     if(j==6){ //last word only has 7 usable bytes
+    	    	 	 for(k=0;k<7;k++){
+    	    	 		outbyte (((unsigned char *) &output) [0]);
+    	    	 		outbyte (((unsigned char *) &output) [1]);
+    	    	 		outbyte (((unsigned char *) &output) [2]);
+    	    	 		outbyte (((unsigned char *) &output) [3]);
+    	    	 		outbyte (((unsigned char *) &output) [4]);
+    	    	 		outbyte (((unsigned char *) &output) [5]);
+    	    	 		outbyte (((unsigned char *) &output) [6]);
+    	    	 		//outbyte (((unsigned char *) &output) [7]);
+    	    	 	 }
+    	     }else{
+    	    	 uart_send_u64(output);
+    	     }
+
+
+         }
+
      }
+
+
+#else
+    int i;
+    u64 output;
+    u32 nsamples = 1000; //assumes 64 bit words
+    u32 nbytes = nsamples * 8;
+
+    //send the xmission length
+    uart_send_u32(nbytes);
+
+    //send the samples
+    for(i=0;i<nsamples;i++){
+     	output = Xil_In64(TARGET(9));
+     	//printf("%016llX\n\n",output);
+
+        uart_send_u64(output);
+     }
+
 
 #endif
 
