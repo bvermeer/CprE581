@@ -176,7 +176,7 @@ In Section II, the general architecture of the chosen hardware platform is descr
 
 
 \section{Xilinx Zynq 7000 Architecture}
-For our implementation we choose to use the Avnet Zedboard which is based around the Xilinx Zynq-7000 series SoC. The Zynq-7000 series SoC features an ARM\textregistered\ Cortex\textsuperscript{TM}-A9 dual core CPU and a Xilinx FPGA all in a single package. For communication between custom FPGA cores and the CPU, the Zynq 7000 features four high performance AXI interconnect bus ports which can be configured in several different ways depending on the application needs.
+For our implementation we choose to use the Avnet Zedboard which is based around the Xilinx Zynq-7000 series SoC. The Zynq-7000 series SoC features an ARM\textregistered\ Cortex\textsuperscript{TM}-A9 dual core CPU and a Xilinx FPGA all in a single package. For communication between custom FPGA cores and the CPU, the Zynq 7000 features four high performance AXI interconnect bus ports which can be configured in several different ways depending on the application needs. \cite{Zynq-7000_Manual}
 
 
 
@@ -194,25 +194,49 @@ The AXI bus interface is part of the ARM AMBA 4.0 specification. The specific ve
 		
 	\end{itemize}
 
-Between the AXI4 and AXI4-Lite interfaces, the address resolution stage is identical. Also, in addition to the bus interface type, there are multiple selectable interconnect architectures that can be used to connect multiple devices to a single AXI interconnect. These interconnect architectures are: \\
+Between the AXI4 and AXI4-Lite interfaces, the address resolution stage is identical. Also, in addition to the bus interface type, there are multiple selectable interconnect architectures that can be used to connect multiple devices to a single AXI interconnect. 
 
-	\begin{itemize}
-	
-		\item Pass Through
-		
-		\item Conversion Only
-		
-		\item N-to-1 interconnect
-		
-		\item 1-to-N Interconnect
-		
-		\item N-to-M Interconnect (Sparse Crossbar Mode)
-		
-		\item N-to-M Interconnect (Shared Access Mode) \\
+Since the TRNG we are interfacing with is a memory-mapped device, we focused on the AXI4 and AXI4-Lite bus interfaces. We implemented the TRNG using both of these interfaces and compared the throughput differences between these interfaces. 
 
-	\end{itemize} 
 
-Since the TRNG we are interfacing with is a memory-mapped device, we focused on the AXI4 and AXI4-Lite bus interfaces. We implemented the TRNG using both of these interfaces and compared the throughput differences between these interfaces.
+\subsection{AXI Bus Throughput Limitations}
+
+Since one of the main goals of the project was to maximize the throughput of the randomly generated numbers by the TRNG to the CPU, we explored the sources of overhead in the AXI bus. There are several limiting factors for the maximum transfer rate of data over the AXI interface. The first factor is the clock rate at which the custom FPGA core is being run and the data width it outputs which limits the amount of data it can send over the AXI bus. The second factor is the clock rate at which the AXI bus is being run. The third factor is the interconnect structure, and the final limiting factor is the overhead associated with decoding the address of the AXI device. \\
+
+
+\subsubsection{FPGA Core Clock Rate and Bus Width}
+The maximum clock rate that a custom FPGA core can be run at is determined by the complexity of the design and the length of the critical path through the design. The maximum clock rate of the design will limit the rate at which the core can read and write to the AXI bus which will in turn limit the maximum throughput between the CPU and the FPGA core. It is important to note that the AXI bus supports operating at different clock rates than the peripherals attached to it. This allows for slower cores to not slow down the entire AXI bus. The bus width chosen for the FPGA core will also affect the throughput. The AXI-Lite bus supports transferring up to 32-bit wide data while the AXI4 bus supports transferring data up to 64-bits wide. If a data width used by an FPGA core does not match the width used by the AXI bus, the AXI bus will be configured to handle data width conversion between the core and the AXI bus. \cite{AXI_Reference_Guide} \\
+
+
+\subsubsection{AXI Bus Clock Rate}
+The clock rate for the AXI bus limits the rate at which data can be transfered over the bus. This clock rate is independent of clock rates of the devices which are attached to bus. On the Zedboard the default clock rate for the AXI bus is 100MHz. \\
+
+
+\subsubsection{AXI Interconnect Structure}
+The Zynq-7000 processor supports a couple different AXI interconnect schemes; sparse crossbar and shared access interconnect modes. The sparse crossbar mode allows for multiple master and multiple slave devices to share a single AXI bus. The sparse crossbar mode is built around a shared-address multiple-data (SAMD) topology. The crossbar interconnect strategy allows for multiple parallel read and write data paths between devices as long as all AXI ordering rules are met. With this interconnect strategy there is one central address arbitrator for the entire bus. This address arbitrator ensures that every slave device and only have a single read/write channel open to it at any one time. This ensures that data corruption cannot occur. \\
+
+
+\begin{figure}[!th]
+\centering
+\includegraphics[scale=.3]{Images/Crossbar_Interconnect.png}
+\caption{Sparse Crossbar AXI Interconnect \cite{AXI_Reference_Guide}}
+\label{fig:Crossbar_Interconnect}
+\end{figure} 
+
+
+The other interconnect mode that the Zynq-7000 processor supports is the shared access interconnect mode. In this interconnect scheme, only a single device can use the bus at any one time. Bus requests are handled by a central arbitrator which controls which device has control of the device. The arbitrator always gives priority to read requests over write requests. This mode requires less logic to implement when compared to the crossbar interconnect mode but the trade-off is that it has substantially lower performance when compared to the crossbar interconnect mode.
+
+
+\begin{figure}[!th]
+\centering
+\includegraphics[scale=.4]{Images/Shared_Access_Interconnect.png}
+\caption{Shared Access AXI Interconnect \cite{AXI_Reference_Guide}}
+\label{fig:Shared_Access_Interconnect}
+\end{figure}
+
+
+
+
 
 \section{System Architecture}
 
@@ -236,7 +260,6 @@ Top view components of our design.
 
 
 
-\subsection{AXI Bus}
 
 \subsection{TRNG Entropy Source}
 
