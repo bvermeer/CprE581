@@ -117,3 +117,5 @@ Paper/*.aux
 Paper/*.log
 Paper/*.synctex.gz
 Paper/*.pdf
+Paper/*.bbl
+Paper/*.blg

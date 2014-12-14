@@ -174,12 +174,25 @@ In Section II, the general architecture of the chosen hardware platform is descr
 
 
 \section{Xilinx Zynq 7000 Architecture}
+For our implementation we choose to use the Avnet Zedboard which is based around the Xilinx Zynq-7000 series SoC. The Zynq-7000 series SoC features an ARM\textregistered\ Cortex\textsuperscript{TM}-A9 dual core CPU and a Xilinx FPGA all in a single package. For communication between custom FPGA cores and the CPU, the Zynq 7000 features four high performance AXI interconnect bus ports which can be configured in several different ways depending on the application needs.
 
-General Zynq intro.
 
-\subsection{Perpheral Interfacing Techniques}
 
-Ways in which ZYnq supports custom peripherals.
+
+\subsection{AXI Bus Interface}
+The AXI bus interface is part of the ARM AMBA 4.0 specification. The specific version of the AXI interface that the Zynq-7000 supports is the AXI4 bus interface. The AXI4 bus specification contains three different types of interfaces: \\
+
+	\begin{itemize}
+		
+		\item AXI4 - Memory mapped interface that allows for bursts of up to 256 data transfer cycles for a single address resolution phase. This interface is ideal for high-performance memory-mapped devices.
+		
+		\item AXI4-Lite - A light-weight, single transaction memory mapped interface. Logic requirements for this interface are low and it is a simple interface to design around and use. It is ideal for simple, low-throughput memory-mapped devices.
+		
+		\item AXI4-Stream - This interface does not require any address resolution phase and allows for an unlimited data burst size. This interface type is ideal for high-speed streaming data.
+		
+	\end{itemize}
+
+
 
 \section{System Architecture}
 
