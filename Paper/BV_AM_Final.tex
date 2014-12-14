@@ -72,6 +72,7 @@
 \usepackage[numbers,square]{natbib}
 \usepackage{algorithm}% http://ctan.org/pkg/algorithm
 \usepackage{algpseudocode}% http://ctan.org/pkg/algorithmicx
+\usepackage{booktabs}
 
 \begin{document}
 %
@@ -298,13 +299,19 @@ Performance was assessed as the rate at which new register values can be read ov
   \end{enumerate}
 \end{enumerate}
 
-Timing was assessed by performing 100,000 reads in a loop, using compiler optimization flag -O3. The difference  between the value in the Global Timer after the loop and before the loop can be used to derive the delay. The Global Timer is a hardware timer running at half the core CPU frequency so there is no extra overhead associated with it. The benchmark data is shown below:\\
+Timing was assessed by performing 100,000 reads in a loop, using compiler optimization flag -O3, with an AXI bus frequency of 100Mhz. The difference  between the value in the Global Timer after the loop and before the loop can be used to derive the delay. The Global Timer is a hardware timer running at half the core CPU frequency so there is no extra overhead associated with it. Note that we did not explore the Streaming mode for AXI; this requires a significantly different approach which was not feasible in the project time frame. The benchmark data is shown below:
 
-TODO: MAKE THIS A NICE TABLE!!!\\
+\begin{table}[h]
+\begin{tabular}{@{}lll@{}}
+\toprule
+Setup                                 & Total Time (ms) & Transfer Rate (Mbps) \\ \midrule
+AXI4-Lite (32-bit)                    & 13              & 246                             \\
+AXI4 64-bit (1x 32-bit word transfer) & 15              & 213                             \\
+AXI4 64-bit (2x 32-bit word transfer) & 18              & 355                             \\ \bottomrule
+\end{tabular}
+\end{table}
 
-AXI-lite: 100k * 32 / 13ms = 246 Mbps\\
-AXI (1 word transfer): 100k * 32 / 15ms = 213 Mbps\\
-AXI (2 word transfer): 100k * 64 / 18ms = 355 Mbps\\
+Although the time of a given read remains the same, as our user logic will always complete the RVALID handshake in 1 cycle, there is a measurable increase in latency between reads between AX4-lite and the full AXI4. We designed our peripheral to support 64-bit transfers to maximize throughput. However, since the basic memory-mapped peripheral is only attatched to the lower-performance CPU-AXI interface (GP0/GP1), which is 32-bits, the toolset will automatically insert bus resizing logic into the Programmable Logic which adds additional overhead. However, making full 64-bit transfers increases the overall throughput, in spite of the increase in latency. Performing a short "burst mode" transfer on the AXI4 bus saves cycles compared to making multiple separate transfers. 
 
 \section{Conclusion}
 
