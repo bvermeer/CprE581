@@ -189,11 +189,29 @@ The AXI bus interface is part of the ARM AMBA 4.0 specification. The specific ve
 		
 		\item AXI4-Lite - A light-weight, single transaction memory mapped interface. Logic requirements for this interface are low and it is a simple interface to design around and use. It is ideal for simple, low-throughput memory-mapped devices.
 		
-		\item AXI4-Stream - This interface does not require any address resolution phase and allows for an unlimited data burst size. This interface type is ideal for high-speed streaming data.
+		\item AXI4-Stream - This interface does not require any address resolution phase and allows for an unlimited data burst size. This interface type is ideal for high-speed streaming data. \\
 		
 	\end{itemize}
 
+Between the AXI4 and AXI4-Lite interfaces, the address resolution stage is identical. Also, in addition to the bus interface type, there are multiple selectable interconnect architectures that can be used to connect multiple devices to a single AXI interconnect. These interconnect architectures are: \\
 
+	\begin{itemize}
+	
+		\item Pass Through
+		
+		\item Conversion Only
+		
+		\item N-to-1 interconnect
+		
+		\item 1-to-N Interconnect
+		
+		\item N-to-M Interconnect (Sparse Crossbar Mode)
+		
+		\item N-to-M Interconnect (Shared Access Mode) \\
+
+	\end{itemize} 
+
+Since the TRNG we are interfacing with is a memory-mapped device, we focused on the AXI4 and AXI4-Lite bus interfaces. We implemented the TRNG using both of these interfaces and compared the throughput differences between these interfaces.
 
 \section{System Architecture}
 
