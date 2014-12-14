@@ -70,7 +70,8 @@
 \usepackage{subfig}
 \usepackage{amsmath}
 \usepackage[numbers,square]{natbib}
-
+\usepackage{algorithm}% http://ctan.org/pkg/algorithm
+\usepackage{algpseudocode}% http://ctan.org/pkg/algorithmicx
 
 \begin{document}
 %
@@ -215,9 +216,6 @@ Top view components of our design.
 
 
 
-\subsection{Software}
-
-The software portion of our system consists of a simple testbench coupled with a small bare-metal support library. EXAMPLE.
 
 \subsection{AXI Bus}
 
@@ -244,6 +242,32 @@ The entropy source consists of a large array of identical cells. Each cell is an
 \subsection{Strong Mixing Function}
 
 Because only a subset of PUF bits exhibit unstable behavior, a strong mixing function is needed to eliminate 0- or 1-bias, and to spread bit changes accross all output bits. For this project an opensource implementation of MD5 was used. It is designed for streaming operation and can complete one hash per AXI bus clock cycle, so that the average latency is eqivalent to a simple register file. It is the output of the mixing function which is considered the true-random number, and thus it is this value which is made available to the CPU over the AXI bus in the form of a memory-mapped register.  
+
+\subsection{Software}
+
+The software portion of our system consists of a simple testbench coupled with a small bare-metal support library. The example code below shows how registers 0 through 10 can be accessed as simple memory pointer dereferences, and Fig.~\ref{fig:dump} shows the results being printed over the serial port to a terminal. Note that \emph{u64} represents a 64-bit datatype. 
+
+\begin{algorithm}
+  \caption{Accessing Peripheral Registers}\label{euclid}
+  \begin{algorithmic}[1]
+    \Procedure{DumpRegs}{}
+      \For{\texttt{i=0 to 10}}
+	\State $offset\gets (i<<3)$
+        \State $r\gets *( u64 *) (TRNG\_BASE\_ADDR+offset)$
+      \EndFor
+      \State \textbf{return} $b$
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
+
+\begin{figure}[!th]
+\centering
+\includegraphics[scale=.9]{Images/dump2.png}
+\caption{ Terminal Session Reading Out 64-bit TRNG register contents. (A) Raw PUF bits (debug only) (B) Hashed PUF bits}
+\label{fig:dump}
+\end{figure} 
+
 
 \section{System Performance}
 
@@ -274,6 +298,13 @@ Performance was assessed as the rate at which new register values can be read ov
   \end{enumerate}
 \end{enumerate}
 
+Timing was assessed by performing 100,000 reads in a loop, using compiler optimization flag -O3. The difference  between the value in the Global Timer after the loop and before the loop can be used to derive the delay. The Global Timer is a hardware timer running at half the core CPU frequency so there is no extra overhead associated with it. The benchmark data is shown below:\\
+
+TODO: MAKE THIS A NICE TABLE!!!\\
+
+AXI-lite: 100k * 32 / 13ms = 246 Mbps\\
+AXI (1 word transfer): 100k * 32 / 15ms = 213 Mbps\\
+AXI (2 word transfer): 100k * 64 / 18ms = 355 Mbps\\
 
 \section{Conclusion}
 
