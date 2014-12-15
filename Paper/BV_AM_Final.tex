@@ -78,7 +78,7 @@
 %
 % paper title
 % can use linebreaks \\ within to get better formatting as desired
-\title{Designing a CPU Coprocessor using Xilinx AXI Bus }
+\title{Designing a Coprocessor using Xilinx AXI Bus }
 %
 %
 % author names and IEEE memberships
@@ -240,7 +240,7 @@ The other interconnect mode that the Zynq-7000 processor supports is the shared 
 
 \section{System Architecture}
 
-Top view components of our design.
+A generalized template for memory-mapped peripherals is shown in Fig.~\ref{fig:template}. All logic enclosed in the Programmable Logic is described using VHDL or Verilog and can be customized to fit any application. Our TRNG design is contained in the ``User Logic'' block.
 
 \begin{figure}[!th]
 \centering
@@ -265,7 +265,7 @@ Top view components of our design.
 
 The entropy source for the TRNG is based on a FPGA-based Physically Unclonable Function (PUF) design \cite{fpga_puf}. The PL of the Zynq 7000 is based on the Virtex-5 architecture, making porting the design a trivial affair. Given this,  the mechanics of the entropy source will only be summarized here. 
 
-The entropy source consists of a large array of identical cells. Each cell is an FPGA-based analogue to an SRAM PUF. For example, in Fig.~\ref{conceptualdesign}, if both switches are initially closed, then the capacitors at Q1 and Q2 are both charged. Then at $t$=0, the switches are opened and the circuit resolves to a stable state which depends on the  delay through the inverter and interconnects, as well as the switching threshold of the logic. If route R1 has a shorter delay, it will remain at logical 1 and force Q2 to logical 0. If route R2 has a shorter delay, it will remain at logical 1 and force Q1 to logical 0. Thus Q1 and Q2 will always resolve to opposing values, but which has which value depends on the physical properties of the hardware.  The PUF design is shown in Fig.~\ref{logicaldesign}.  The switches are replaced by combinational logic implemented in LUTs.
+The entropy source consists of a large array of 440 identical cells. Each cell is an FPGA-based analogue to an SRAM PUF. For example, in Fig.~\ref{conceptualdesign}, if both switches are initially closed, then the capacitors at Q1 and Q2 are both charged. Then at $t$=0, the switches are opened and the circuit resolves to a stable state which depends on the  delay through the inverter and interconnects, as well as the switching threshold of the logic. If route R1 has a shorter delay, it will remain at logical 1 and force Q2 to logical 0. If route R2 has a shorter delay, it will remain at logical 1 and force Q1 to logical 0. Thus Q1 and Q2 will always resolve to opposing values, but which has which value depends on the physical properties of the hardware.  The PUF design is shown in Fig.~\ref{logicaldesign}.  The switches are replaced by combinational logic implemented in LUTs.
 
 
 \begin{figure}
@@ -283,11 +283,11 @@ The entropy source consists of a large array of identical cells. Each cell is an
 
 \subsection{Strong Mixing Function}
 
-Because only a subset of PUF bits exhibit unstable behavior, a strong mixing function is needed to eliminate 0- or 1-bias, and to spread bit changes accross all output bits. For this project an opensource implementation of MD5 was used. It is designed for streaming operation and can complete one hash per AXI bus clock cycle, so that the average latency is eqivalent to a simple register file. It is the output of the mixing function which is considered the true-random number, and thus it is this value which is made available to the CPU over the AXI bus in the form of a memory-mapped register.  
+Because only a subset of PUF bits exhibit unstable behavior, a strong mixing function is needed to eliminate 0- or 1-bias, and to spread bit changes accross all output bits. For this project an opensource implementation of MD5 was used. It is designed for streaming operation and can complete one hash per AXI bus clock cycle, so that the average latency is eqivalent to a simple register file. It is the output of the mixing function which is considered the true-random number, and thus it is this value which is made available to the CPU over the AXI bus in the form of a memory-mapped register. The MD5 hash produces 128 bits, though we only use the lower 64. The synthesis tools trim away unused logic. 
 
 \subsection{Software}
 
-The software portion of our system consists of a simple testbench coupled with a small bare-metal support library. The example code below shows how registers 0 through 10 can be accessed as simple memory pointer dereferences, and Fig.~\ref{fig:dump} shows the results being printed over the serial port to a terminal. Note that \emph{u64} represents a 64-bit datatype. 
+The software portion of our system consists of a simple C-language testbench coupled with a small bare-metal support library. This code runs on one of the two ARM cores and interacts with the custom logic. The example code below shows how registers 0 through 10 can be accessed as simple memory pointer dereferences, and Fig.~\ref{fig:dump} shows the results being printed over the serial port to a terminal. Note that \emph{u64} represents a 64-bit datatype. 
 
 \begin{algorithm}
   \caption{Accessing Peripheral Registers}\label{euclid}
@@ -296,8 +296,8 @@ The software portion of our system consists of a simple testbench coupled with a
       \For{\texttt{i=0 to 10}}
 	\State $offset\gets (i<<3)$
         \State $r\gets *( u64 *) (TRNG\_BASE\_ADDR+offset)$
-      \EndFor
-      \State \textbf{return} $b$
+	\State print(r)
+      \EndFor      
     \EndProcedure
   \end{algorithmic}
 \end{algorithm}
@@ -340,7 +340,7 @@ Performance was assessed as the rate at which new register values can be read ov
   \end{enumerate}
 \end{enumerate}
 
-Timing was assessed by performing 100,000 reads in a loop, using compiler optimization flag -O3, with an AXI bus frequency of 100Mhz. The difference  between the value in the Global Timer after the loop and before the loop can be used to derive the delay. The Global Timer is a hardware timer running at half the core CPU frequency so there is no extra overhead associated with it. Note that we did not explore the Streaming mode for AXI; this requires a significantly different approach which was not feasible in the project time frame. The benchmark data is shown below:
+Timing was assessed by performing 100,000 reads in a loop, using compiler optimization flag -O3, with an AXI bus frequency of 100Mhz, and no other slaves attached to the bus. The difference  between the value in the Global Timer after the loop and before the loop can be used to derive the delay. The Global Timer is a hardware timer running at half the core CPU frequency so there is no extra overhead associated with it. Note that we did not explore the Streaming mode for AXI; this requires a significantly different approach which was not feasible in the project time frame. The benchmark data is shown below:
 
 \begin{table}[h]
 \begin{tabular}{@{}lll@{}}
@@ -352,11 +352,11 @@ AXI4 64-bit (2x 32-bit word transfer) & 18              & 355                   
 \end{tabular}
 \end{table}
 
-Although the time of a given read remains the same, as our user logic will always complete the RVALID handshake in 1 cycle, there is a measurable increase in latency between reads between AX4-lite and the full AXI4. We designed our peripheral to support 64-bit transfers to maximize throughput. However, since the basic memory-mapped peripheral is only attatched to the lower-performance CPU-AXI interface (GP0/GP1), which is 32-bits, the toolset will automatically insert bus resizing logic into the Programmable Logic which adds additional overhead. However, making full 64-bit transfers increases the overall throughput, in spite of the increase in latency. Performing a short "burst mode" transfer on the AXI4 bus saves cycles compared to making multiple separate transfers. 
+Although the time of a given read remains the same, as our user logic will always complete the RVALID handshake in 1 cycle, there is a measurable increase in latency between reads between AX4-lite and the full AXI4. We designed our peripheral to support 64-bit transfers to maximize throughput. However, since the basic memory-mapped peripheral is only attatched to the lower-performance CPU-AXI interface (GP0/GP1), which is 32-bits, the toolset will automatically insert bus resizing logic into the Programmable Logic which adds additional overhead. However, making full 64-bit transfers increases the overall throughput, in spite of the increase in latency. Performing a short ``burst mode'' transfer on the AXI4 bus saves cycles compared to making multiple separate transfers. 
 
 \section{Conclusion}
 
-In concluding, we were successfully able to implement and TRNG on the Zynq-7000 SoC and interface it to the ARM processor over the AXI bus. We then proceeded to test two different AXI bus implementations (AXI-Lite and AXI4) and found that the AXI4 bus offers the highest throughput when using and bus width of 64-bits and transferring small bursts of two 32-bit words at a time from the TRNG. Overall, this project has gained up valuable experience with creating a custom FGPA core on the Zynq-7000 SoC and interfacing it with the ARM core. This will help provide the foundation for using the Zynq-7000 processor for future research. 
+In concluding, we were successfully able to implement and TRNG on the Zynq-7000 SoC and interface it to the ARM processor over the AXI bus. We then proceeded to test two different AXI bus implementations (AXI-Lite and AXI4) and found that the AXI4 bus offers the highest throughput when using and bus width of 64-bits and transferring small bursts of two 32-bit words at a time from the TRNG. Overall, this project has gained us valuable experience in creating a custom FGPA core on the Zynq-7000 SoC and interfacing it with the ARM core. This will help provide the foundation for using the Zynq-7000 processor for future research. 
 
 
 
