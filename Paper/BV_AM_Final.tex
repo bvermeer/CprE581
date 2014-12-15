@@ -147,7 +147,7 @@
 
 \begin{abstract}
 %\boldmath
-The abstract goes here.
+In this project we implemented a True-Random Number Generator (TRNG) as a peripheral device on a Zynq-7000 SoC and interfaced it with the ARM processor on the same chip using a high-performance AXI bus. We then proceeded to test the throughput of various different bus configurations and compare their performance.
 \end{abstract}
 % IEEEtran.cls defaults to using nonbold math in the Abstract.
 % This preserves the distinction between vectors and scalars. However,
@@ -170,7 +170,7 @@ The abstract goes here.
 
 \section{Introduction}
 
-In this project we extend the functionality of a ARM-based CPU to interface with a True-Random Number Generator (TRNG) over a high-speed, high throughput peripheral interface.  A True-Random Number Generator (TRNG) is a device which generates random binary values based on physical entropy. This is in contrast to psuedo-random number generators, which generate random numbers based on a particular algorithm. TRNGs are critical components in applications requiring a high level of security. Using a relatively simple implementation allows us to focus on exploring the mechanics of CPU peripheral interfacing in the context of a modern, reconfigurable microcontroller.  
+In this project we extend the functionality of a ARM-based CPU to interface with a True-Random Number Generator (TRNG) over a high-speed, high throughput peripheral interface.  A TRNG is a device which generates random binary values based on physical entropy. This is in contrast to psuedo-random number generators, which generate random numbers based on a particular algorithm. TRNGs are critical components in applications requiring a high level of security. Using a relatively simple implementation allows us to focus on exploring the mechanics of CPU peripheral interfacing in the context of a modern, reconfigurable microcontroller.  
 
 In Section II, the general architecture of the chosen hardware platform is described. In Section III, the specific details are our implementation are covered. Section IV shows our performance benchmarking results, and Section V concludes.
 
@@ -356,7 +356,7 @@ Although the time of a given read remains the same, as our user logic will alway
 
 \section{Conclusion}
 
-In concluding, we were able to successfully meet our goals for the project, etc, etc.  
+In concluding, we were successfully able to implement and TRNG on the Zynq-7000 SoC and interface it to the ARM processor over the AXI bus. We then proceeded to test two different AXI bus implementations (AXI-Lite and AXI4) and found that the AXI4 bus offers the highest throughput when using and bus width of 64-bits and transferring small bursts of two 32-bit words at a time from the TRNG. Overall, this project has gained up valuable experience with creating a custom FGPA core on the Zynq-7000 SoC and interfacing it with the ARM core. This will help provide the foundation for using the Zynq-7000 processor for future research. 
 
 
 
