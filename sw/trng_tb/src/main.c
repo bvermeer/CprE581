@@ -214,7 +214,7 @@ int main()
 
 
     	     if(j==6){ //last word only has 7 usable bytes
-    	    	 	 for(k=0;k<7;k++){
+    	    	 	 //for(k=0;k<7;k++){
     	    	 		outbyte (((unsigned char *) &output) [0]);
     	    	 		outbyte (((unsigned char *) &output) [1]);
     	    	 		outbyte (((unsigned char *) &output) [2]);
@@ -223,7 +223,7 @@ int main()
     	    	 		outbyte (((unsigned char *) &output) [5]);
     	    	 		outbyte (((unsigned char *) &output) [6]);
     	    	 		//outbyte (((unsigned char *) &output) [7]);
-    	    	 	 }
+    	    	 	 //}
     	     }else{
     	    	 uart_send_u64(output);
     	     }
